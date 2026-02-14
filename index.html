@@ -1,12 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake & Ladder Online Multiplayer</title>
+    <title>Snake & Ladder Pro Online</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <style>
         :root {
             --primary-bg: #1a1a2e;
@@ -22,7 +21,6 @@
             margin: 0;
             background: var(--primary-bg);
             color: white;
-            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -39,8 +37,6 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        .nav-btns { display: flex; gap: 8px; }
-
         .btn-nav {
             background: rgba(255,255,255,0.1);
             border: 1px solid #555;
@@ -48,11 +44,7 @@
             border-radius: 8px;
             padding: 5px 12px;
             cursor: pointer;
-            font-size: 13px;
-            transition: 0.3s;
         }
-
-        .btn-nav:hover { background: var(--accent); color: #000; border-color: var(--accent); }
 
         #menu {
             position: fixed;
@@ -62,7 +54,6 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 15px;
             z-index: 100;
         }
 
@@ -75,19 +66,10 @@
             border-radius: 50px;
             cursor: pointer;
             font-weight: bold;
-            margin: 5px;
+            margin: 10px;
         }
 
-        input {
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            margin: 5px;
-            width: 140px;
-            text-align: center;
-            background: #e0e0e0;
-            color: #333;
-        }
+        input { padding: 10px; border-radius: 5px; border: none; margin: 5px; width: 140px; text-align: center; }
 
         #boardWrap {
             position: relative;
@@ -109,7 +91,7 @@
         .cell {
             border: 0.1px solid rgba(255, 255, 255, 0.05);
             aspect-ratio: 1/1;
-            font-size: 9px;
+            font-size: 10px;
             color: rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
@@ -123,67 +105,45 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
         }
 
-        .name-tag {
-            font-size: 9px;
-            background: rgba(0,0,0,0.8);
-            padding: 1px 5px;
-            border-radius: 3px;
-            margin-bottom: 2px;
-        }
-
-        .token { width: 18px; height: 18px; border-radius: 50%; border: 2px solid white; }
+        .token { width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; }
         #p1_container .token { background: var(--red-player); box-shadow: 0 0 10px var(--red-player); }
         #p2_container .token { background: var(--blue-player); box-shadow: 0 0 10px var(--blue-player); }
 
         #dice {
-            width: 60px; height: 60px; margin: 10px auto;
+            width: 60px; height: 60px; margin: 15px auto;
             display: flex; align-items: center; justify-content: center;
-            font-size: 26px; font-weight: bold; color: white;
-            border-radius: 12px; background: #333;
+            font-size: 28px; font-weight: bold; color: white;
+            border-radius: 12px; background: #333; border: 2px solid #555;
         }
 
-        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.4; }
-        .snakeCell { background: rgba(255, 77, 77, 0.1) !important; }
-        .ladderCell { background: rgba(46, 204, 113, 0.1) !important; }
-        .symbol { position: absolute; font-size: 18px; bottom: 1px; right: 1px; }
-        
-        #roomInfoContainer {
-            margin-top: 10px;
-            background: rgba(255,255,255,0.1);
-            padding: 8px;
-            border-radius: 8px;
-            font-size: 12px;
-        }
+        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.5; }
+        .snakeCell { background: rgba(255, 77, 77, 0.15) !important; }
+        .ladderCell { background: rgba(46, 204, 113, 0.15) !important; }
+        .symbol { position: absolute; font-size: 18px; }
+        #roomInfoContainer { margin-top: 10px; font-size: 14px; background: #222; padding: 5px 15px; border-radius: 20px; }
     </style>
 </head>
 <body>
 
 <div id="menu">
-    <h1>🐍 S&L ONLINE 🪜</h1>
+    <h1>🐍 S&L PRO 🪜</h1>
     <input type="text" id="playerName" placeholder="Your Name" value="Player">
-    <hr style="width: 80%; opacity: 0.2;">
-    
-    <div id="offlineOptions">
-        <button class="btn-main" onclick="startLocalGame(false)">Local 2 Player</button>
-        <button class="btn-main" onclick="startLocalGame(true)">Vs Computer</button>
-    </div>
-
-    <div id="onlineOptions">
-        <button class="btn-main" style="background: #27ae60;" onclick="createRoom()">Create Online Room</button>
-        <div style="margin-top: 5px;">
-            <input type="text" id="joinID" placeholder="Enter Room ID">
-            <button class="btn-main" style="background: #8e44ad;" onclick="joinRoom()">Join Room</button>
-        </div>
+    <button class="btn-main" onclick="startLocalGame(false)">Local 2 Player</button>
+    <button class="btn-main" onclick="startLocalGame(true)">Vs Computer</button>
+    <div style="border-top: 1px solid #333; padding-top: 10px;">
+        <button class="btn-main" style="background: #27ae60;" onclick="createRoom()">Create Online</button><br>
+        <input type="text" id="joinID" placeholder="Room ID">
+        <button class="btn-main" style="background: #8e44ad;" onclick="joinRoom()">Join</button>
     </div>
 </div>
 
 <div class="top-bar">
     <div id="score">
-        <span id="s1Name" style="color:var(--red-player)">P1</span>: <span id="s1Score">0</span> | 
-        <span id="s2Name" style="color:var(--blue-player)">P2</span>: <span id="s2Score">0</span>
+        <b id="s1Name" style="color:var(--red-player)">P1</b>: <span id="s1Score">0</span> | 
+        <b id="s2Name" style="color:var(--blue-player)">P2</b>: <span id="s2Score">0</span>
     </div>
     <div class="nav-btns">
         <button onclick="goToMenu()" class="btn-nav">🏠 Menu</button>
@@ -192,23 +152,22 @@
 </div>
 
 <div id="roomInfoContainer" style="display:none;">
-    <span id="roomText">Room ID: ----</span>
-    <button onclick="copyRoomLink()" class="btn-nav" style="margin-left:10px; background:var(--accent); color:#000;">🔗 Copy Link</button>
+    <span id="roomText">ID: ----</span>
+    <button onclick="copyRoomLink()" class="btn-nav" style="margin-left:10px; background:var(--accent); color:#000;">🔗 Link</button>
 </div>
 
 <div id="boardWrap">
     <div id="board"></div>
     <svg id="lines"></svg>
-    <div id="p1_container" class="player-container"><div class="name-tag" id="tag1">P1</div><div class="token"></div></div>
-    <div id="p2_container" class="player-container"><div class="name-tag" id="tag2">P2</div><div class="token"></div></div>
+    <div id="p1_container" class="player-container"><div class="token"></div></div>
+    <div id="p2_container" class="player-container"><div class="token"></div></div>
 </div>
 
-<div id="dice">1</div>
+<div id="dice">?</div>
 <button class="btn-main" id="rollBtn" onclick="handleRollClick()">🎲 ROLL DICE</button>
-<p id="turnInfo">Waiting...</p>
+<p id="turnInfo">Loading...</p>
 
 <script>
-// --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
     apiKey: "AIzaSyDwusHhHz2a_E8Wq1TCm97invNVlwD5-qI",
     authDomain: "snake-ladder-9c299.firebaseapp.com",
@@ -222,72 +181,54 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-const board = document.getElementById("board");
-const svg = document.getElementById("lines");
-const diceBox = document.getElementById("dice");
+let snakes = {}, ladders = {};
+let positions = [1, 1], currentPlayer = 0;
+let scores = [0, 0], moving = false;
+let isOnline = false, myPlayerIndex = 0, roomID = null, vsComputer = false;
+let playerNames = ["Player 1", "Player 2"];
 
-// Setup Board
+// Create Grid
+const boardDiv = document.getElementById("board");
 for(let r=9; r>=0; r--){
     let row=[];
     for(let c=0; c<10; c++) row.push(r%2===0 ? r*10+c+1 : r*10+(10-c));
     row.forEach(n => {
         const cell = document.createElement("div");
         cell.className = "cell"; cell.id = "cell" + n; cell.innerText = n;
-        board.appendChild(cell);
+        boardDiv.appendChild(cell);
     });
 }
 
-let snakes = {}, ladders = {};
-let positions = [1, 1], currentPlayer = 0;
-let score = [0, 0], moving = false;
-let isOnline = false, myPlayerIndex = 0, roomID = null, vsComputer = false;
-let playerNames = ["Player 1", "Player 2"];
-
-// --- AUTO JOIN LOGIC ON LOAD ---
-window.onload = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sharedRoom = urlParams.get('room');
-    if(sharedRoom) {
-        document.getElementById("joinID").value = sharedRoom;
-        // User still needs to put name and click Join, or we can automate it
-    }
-    drawLines();
-};
-
 function generateBoardObjects(seed) {
-    const rng = seed ? (() => { 
-        let s = seed; 
-        return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }
-    })() : Math.random;
-
+    const rng = seed ? (() => { let s = seed; return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; } })() : Math.random;
     snakes = {}; ladders = {};
-    while(Object.keys(snakes).length < 5) {
-        let s = Math.floor(rng() * 40) + 60, e = s - (Math.floor(rng() * 40) + 10);
-        if(s > e && s <= 99 && e > 1) snakes[s] = e;
+    while(Object.keys(snakes).length < 6) {
+        let s = Math.floor(rng() * 40) + 55, e = s - (Math.floor(rng() * 40) + 10);
+        if(s > e && s < 100 && e > 1) snakes[s] = e;
     }
-    while(Object.keys(ladders).length < 5) {
+    while(Object.keys(ladders).length < 6) {
         let s = Math.floor(rng() * 50) + 2, e = s + (Math.floor(rng() * 30) + 10);
         if(e < 100 && !snakes[s]) ladders[s] = e;
     }
+    renderBoardUI();
 }
 
 function renderBoardUI() {
     document.querySelectorAll(".symbol").forEach(e => e.remove());
     document.querySelectorAll(".cell").forEach(c => c.classList.remove("snakeCell", "ladderCell"));
     Object.entries(snakes).forEach(([s, e]) => {
-        const cell = document.getElementById("cell" + s);
-        cell.classList.add("snakeCell");
-        cell.innerHTML += `<div class="symbol">🐍</div>`;
+        document.getElementById("cell"+s).classList.add("snakeCell");
+        document.getElementById("cell"+s).innerHTML += `<span class="symbol">🐍</span>`;
     });
     Object.entries(ladders).forEach(([l, e]) => {
-        const cell = document.getElementById("cell" + l);
-        cell.classList.add("ladderCell");
-        cell.innerHTML += `<div class="symbol">🪜</div>`;
+        document.getElementById("cell"+l).classList.add("ladderCell");
+        document.getElementById("cell"+l).innerHTML += `<span class="symbol">🪜</span>`;
     });
     drawLines();
 }
 
 function drawLines() {
+    const svg = document.getElementById("lines");
     svg.innerHTML = "";
     Object.entries(snakes).forEach(([s, e]) => drawSingleLine(s, e, "#ff4d4d"));
     Object.entries(ladders).forEach(([s, e]) => drawSingleLine(s, e, "#2ecc71"));
@@ -295,196 +236,180 @@ function drawLines() {
 
 function drawSingleLine(a, b, color) {
     const c1 = getCenter(a), c2 = getCenter(b);
-    if(!c1 || !c2) return;
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", c1.x); line.setAttribute("y1", c1.y);
     line.setAttribute("x2", c2.x); line.setAttribute("y2", c2.y);
-    line.setAttribute("stroke", color); line.setAttribute("stroke-width", "2");
-    svg.appendChild(line);
+    line.setAttribute("stroke", color); line.setAttribute("stroke-width", "3");
+    document.getElementById("lines").appendChild(line);
 }
 
 function getCenter(n) {
     const el = document.getElementById("cell" + n);
-    if(!el) return null;
-    const r = el.getBoundingClientRect(), p = board.getBoundingClientRect();
-    return { x: r.left - p.left + r.width / 2, y: r.top - p.top + r.height / 2 };
+    const r = el.getBoundingClientRect(), p = boardDiv.getBoundingClientRect();
+    return { x: r.left - p.left + r.width/2, y: r.top - p.top + r.height/2 };
+}
+
+async function handleRollClick() {
+    if(moving) return;
+    if(isOnline && currentPlayer !== myPlayerIndex) return alert("Not your turn!");
+    
+    const roll = Math.floor(Math.random() * 6) + 1;
+    if(isOnline) {
+        database.ref('rooms/' + roomID).update({ lastRoll: roll, lastPlayer: myPlayerIndex, turn: (currentPlayer + 1) % 2 });
+    } else {
+        await executeMove(roll, currentPlayer);
+        if(!moving) {
+            currentPlayer = (currentPlayer + 1) % 2;
+            updateUI();
+            if(vsComputer && currentPlayer === 1) setTimeout(handleRollClick, 800);
+        }
+    }
+}
+
+async function executeMove(dice, pIdx) {
+    moving = true;
+    const diceEl = document.getElementById("dice");
+    diceEl.innerText = dice;
+    diceEl.style.borderColor = pIdx === 0 ? "var(--red-player)" : "var(--blue-player)";
+
+    let currentPos = positions[pIdx];
+    let targetPos = currentPos + dice;
+
+    // RULE: Must be exact 100 to win
+    if(targetPos <= 100) {
+        for(let i = currentPos + 1; i <= targetPos; i++) {
+            positions[pIdx] = i;
+            updateUI();
+            await new Promise(r => setTimeout(r, 250));
+        }
+        
+        // Check Snake or Ladder
+        let finalPos = positions[pIdx];
+        if(snakes[finalPos] || ladders[finalPos]) {
+            await new Promise(r => setTimeout(r, 300));
+            positions[pIdx] = snakes[finalPos] || ladders[finalPos];
+            updateUI();
+        }
+    }
+
+    // Win Check
+    if(positions[pIdx] === 100) {
+        alert(playerNames[pIdx] + " WINS!");
+        scores[pIdx]++;
+        if(isOnline && myPlayerIndex === 0) {
+             const newSeed = Math.floor(Math.random() * 1000000);
+             database.ref('rooms/' + roomID).update({ 
+                p1Score: scores[0], p2Score: scores[1], 
+                seed: newSeed, lastRoll: 0 
+             });
+        } else if(!isOnline) {
+            generateBoardObjects();
+            positions = [1, 1];
+        }
+    }
+
+    moving = false;
 }
 
 function updateUI() {
     [0, 1].forEach(i => {
         const c = getCenter(positions[i]);
-        if(c) {
-            const container = document.getElementById(`p${i+1}_container`);
-            container.style.left = (c.x + (i===1?8:-8) - 10) + "px";
-            container.style.top = (c.y - 22) + "px";
-        }
-        document.getElementById("tag" + (i+1)).innerText = playerNames[i];
+        const container = document.getElementById(`p${i+1}_container`);
+        container.style.left = (c.x - 10) + "px";
+        container.style.top = (c.y - 10) + "px";
+        if(i === 1 && positions[0] === positions[1]) container.style.left = (c.x - 2) + "px";
     });
+    document.getElementById("s1Score").innerText = scores[0];
+    document.getElementById("s2Score").innerText = scores[1];
     document.getElementById("s1Name").innerText = playerNames[0];
     document.getElementById("s2Name").innerText = playerNames[1];
-    document.getElementById("s1Score").innerText = score[0];
-    document.getElementById("s2Score").innerText = score[1];
     document.getElementById("turnInfo").innerText = playerNames[currentPlayer] + "'s Turn";
 }
 
-async function handleRollClick() {
-    if(moving) return;
-    if(isOnline && currentPlayer !== myPlayerIndex) return alert("Wait for your turn!");
-    
-    const dice = Math.floor(Math.random() * 6) + 1;
-    if(isOnline) {
-        database.ref('rooms/' + roomID).update({
-            lastRoll: dice,
-            turn: (currentPlayer + 1) % 2,
-            timestamp: Date.now()
-        });
-    } else {
-        await executeMove(dice);
-    }
-}
+// --- Online Logic ---
+function listenToRoom() {
+    database.ref('rooms/' + roomID).on('value', async (snap) => {
+        const data = snap.val();
+        if(!data) return;
 
-async function executeMove(dice) {
-    moving = true;
-    diceBox.innerText = dice;
-    diceBox.style.background = currentPlayer === 0 ? "var(--red-player)" : "var(--blue-player)";
-    
-    let target = positions[currentPlayer] + dice;
-    if(target <= 100) {
-        for(let i = positions[currentPlayer]+1; i <= target; i++) {
-            positions[currentPlayer] = i;
+        playerNames = [data.p1Name, data.p2Name];
+        scores = [data.p1Score, data.p2Score];
+        
+        // Sync Board
+        if(this.currentSeed !== data.seed) {
+            this.currentSeed = data.seed;
+            positions = [1, 1];
+            generateBoardObjects(data.seed);
+        }
+
+        // Sync Roll & Move
+        if(data.lastRoll > 0 && !moving) {
+            await executeMove(data.lastRoll, data.lastPlayer);
+            currentPlayer = data.turn;
             updateUI();
-            await new Promise(r => setTimeout(r, 200));
+        } else {
+            currentPlayer = data.turn;
+            updateUI();
         }
-        let pos = positions[currentPlayer];
-        if(snakes[pos]) positions[currentPlayer] = snakes[pos];
-        if(ladders[pos]) positions[currentPlayer] = ladders[pos];
-    }
-    
-    if(positions[currentPlayer] === 100) {
-        score[currentPlayer]++;
-        alert(playerNames[currentPlayer] + " WINS!");
-        positions = [1, 1];
-        if(!isOnline) { generateBoardObjects(); renderBoardUI(); }
-        else {
-             database.ref('rooms/' + roomID).update({
-                p1Score: score[0],
-                p2Score: score[1],
-                lastRoll: 0
-             });
-        }
-    }
-    
-    if(!isOnline) {
-        currentPlayer = (currentPlayer + 1) % 2;
-        if(vsComputer && currentPlayer === 1) setTimeout(handleRollClick, 1000);
-    }
-    updateUI();
-    moving = false;
-}
-
-// --- ONLINE LINK HELPERS ---
-function copyRoomLink() {
-    const url = new URL(window.location.href);
-    url.searchParams.set('room', roomID);
-    navigator.clipboard.writeText(url.toString()).then(() => {
-        alert("Link Copied! Send it to your friend.");
     });
 }
 
 function createRoom() {
     roomID = Math.floor(1000 + Math.random() * 9000);
     myPlayerIndex = 0;
-    playerNames[0] = document.getElementById("playerName").value || "Player 1";
     isOnline = true;
-    const seed = Math.floor(Math.random() * 100000);
-    
+    const seed = Math.floor(Math.random() * 1000000);
+    playerNames[0] = document.getElementById("playerName").value;
     database.ref('rooms/' + roomID).set({
-        p1Name: playerNames[0],
-        p2Name: "Waiting...",
-        p1Score: 0, p2Score: 0,
-        turn: 0, lastRoll: 0, seed: seed,
-        timestamp: Date.now()
+        p1Name: playerNames[0], p2Name: "Waiting...",
+        p1Score: 0, p2Score: 0, turn: 0, seed: seed, lastRoll: 0
     });
-
     listenToRoom();
-    setupOnlineUI();
+    showGameUI();
 }
 
 function joinRoom() {
     roomID = document.getElementById("joinID").value;
-    if(!roomID) return alert("Enter Room ID");
+    if(!roomID) return;
     myPlayerIndex = 1;
-    playerNames[1] = document.getElementById("playerName").value || "Player 2";
     isOnline = true;
-
+    playerNames[1] = document.getElementById("playerName").value;
     database.ref('rooms/' + roomID).update({ p2Name: playerNames[1] });
-
     listenToRoom();
-    setupOnlineUI();
-}
-
-function setupOnlineUI() {
-    document.getElementById("menu").style.display = "none";
-    document.getElementById("roomInfoContainer").style.display = "block";
-    document.getElementById("roomText").innerText = "Room ID: " + roomID + (myPlayerIndex === 0 ? " (Red)" : " (Blue)");
-}
-
-function listenToRoom() {
-    database.ref('rooms/' + roomID).on('value', (snapshot) => {
-        const data = snapshot.val();
-        if(!data) return;
-        
-        playerNames[0] = data.p1Name;
-        playerNames[1] = data.p2Name;
-        score[0] = data.p1Score;
-        score[1] = data.p2Score;
-        
-        if(Object.keys(snakes).length === 0) {
-            generateBoardObjects(data.seed);
-            renderBoardUI();
-        }
-
-        if(data.lastRoll > 0 && !moving) {
-            if(currentPlayer !== data.turn) {
-                executeMove(data.lastRoll);
-                currentPlayer = data.turn;
-            }
-        }
-        updateUI();
-    });
+    showGameUI();
 }
 
 function startLocalGame(ai) {
     vsComputer = ai;
     isOnline = false;
-    playerNames[0] = document.getElementById("playerName").value || "Player 1";
-    playerNames[1] = ai ? "Computer" : "Player 2";
-    document.getElementById("menu").style.display = "none";
-    document.getElementById("roomInfoContainer").style.display = "none";
+    playerNames = [document.getElementById("playerName").value, ai ? "Computer" : "Player 2"];
     generateBoardObjects();
-    renderBoardUI();
+    showGameUI();
     updateUI();
 }
 
-function goToMenu() {
-    if(roomID) database.ref('rooms/' + roomID).off();
-    window.location.href = window.location.pathname; // Clear URL params and reset
+function showGameUI() {
+    document.getElementById("menu").style.display = "none";
+    if(isOnline) {
+        document.getElementById("roomInfoContainer").style.display = "block";
+        document.getElementById("roomText").innerText = "ID: " + roomID;
+    }
 }
+
+function goToMenu() { location.reload(); }
 
 function restartGame() {
-    positions = [1, 1];
-    currentPlayer = 0;
-    if(isOnline) {
-        const seed = Math.floor(Math.random() * 100000);
-        database.ref('rooms/' + roomID).update({ seed: seed, lastRoll: 0, turn: 0 });
-        generateBoardObjects(seed);
-    } else {
-        generateBoardObjects();
+    if(isOnline && myPlayerIndex === 0) {
+        database.ref('rooms/' + roomID).update({ seed: Math.floor(Math.random()*1000), lastRoll: 0, turn: 0 });
+    } else if(!isOnline) {
+        positions = [1, 1]; currentPlayer = 0; generateBoardObjects(); updateUI();
     }
-    renderBoardUI();
-    updateUI();
 }
 
+window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+    if(params.get('room')) document.getElementById("joinID").value = params.get('room');
+};
 window.onresize = drawLines;
 </script>
 </body>
